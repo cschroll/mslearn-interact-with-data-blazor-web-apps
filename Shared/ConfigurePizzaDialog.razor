@@ -8,8 +8,12 @@
         </div>
         <form class="dialog-body">
             <div>
+            @if (supportSizing)
+            {
                 <label>Size:</label>
-                <input type="range" min="@Pizza.MinimumSize" max="@Pizza.MaximumSize" step="1" @bind="Pizza.Size" @bind:event="oninput" />
+                <input type="range" min="@Pizza.MinimumSize" max="@Pizza.MaximumSize"
+                    step="1" @bind="Pizza.Size" @bind:event="oninput" />
+            }
                 <span class="size-label">
                     @(Pizza.Size)" ($@(Pizza.GetFormattedTotalPrice()))
                 </span>
@@ -30,4 +34,17 @@
     [Parameter] public Pizza Pizza { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback OnConfirm { get; set; }
+
+    bool supportSizing = true;
+
+    // If your code relied on JavaScript interop, using the OnInitialized method wouldn't work. 
+    // Instead, you'd need to use the OnAfterRenderAsync method to ensure the JavaScript interop was available.
+    protected override void OnInitialized()
+    {
+        if (Pizza is { Special.FixedSize: not null })
+        {
+            Pizza.Size = Pizza.Special.FixedSize.Value;
+            supportSizing = false;
+        }
+    }    
 }
